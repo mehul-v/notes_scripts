@@ -1,0 +1,82 @@
+#set a deny filter from TXDMA to tnmdpr page
+
+> read td_pics_p4invf_filter_addr_ctl_value__S[5]
+0x12702914: td_pics_p4invf_filter_addr_ctl_value__S[5/0x5]
+  val: 0x3
+  Fields:
+    [  13   ] round64:         0x0
+    [  12   ] local_ack:       0x0
+    [  11   ] inval_receive:   0x0
+    [  10   ] inval_send:      0x0
+    [   9   ] use_cache:       0x0
+    [   8   ] log_resp:        0x0
+    [   7   ] log_req:         0x0
+    [   6   ] write_interrupt: 0x0
+    [   5   ] read_interrupt:  0x0
+    [   4   ] write_freeze:    0x0
+    [   3   ] read_freeze:     0x0
+    [   2   ] write_access:    0x0
+    [   1   ] read_access:     0x1
+    [   0   ] valid:           0x1
+>
+> read td_pics_p4invf_filter_addr_lo_data__S[5]
+0x12702014: td_pics_p4invf_filter_addr_lo_data__S[5/0x5]
+  val: 0x414a0000
+  Fields:
+    [ 30:0  ] value: 0x414a0000
+> read td_pics_p4invf_filter_addr_hi_data__S[5]
+0x12702114: td_pics_p4invf_filter_addr_hi_data__S[5/0x5]
+  val: 0x41940000
+  Fields:
+    [ 30:0  ] value: 0x41940000
+
+read rd_pics_p4invf_CNT_write_deny__S
+0x12702c04: td_pics_p4invf_CNT_write_deny__S
+  val: 0x0
+  Fields:
+    [ 15:0  ] counter: 0x0
+
+# AXITRACE
+mkdir /data/axitrace/
+Copy axitrace binary to this dir
+
+mkdir /data/axitrace/cfg/
+Copy the following files here: driver_calibrate.cfg  elba.cfg
+Create config file to add filters: axitrace.cfg (based on sample.cfg)
+
+Execute the following commands:
+PATH=$PATH:/data/axitrace/
+ELBA_AXITRACE_ROOT=/data/axitrace axitrace --dry-run -c /data/axitrace/cfg/axitrace.cfg --suppress-log stdout
+ELBA_AXITRACE_ROOT=/data/axitrace axitrace -c /data/axitrace/cfg/axitrace.cfg --suppress-log stdout
+
+Logs will be in ./axitrace.reports/console.log
+
+grep axi_awaddr ../axitrace/cfg/axitrace.reports/trace_RD.log 
+
+# DMA trace
+copy nic/conf/elbtrace/sample-conf-dma.json to /data/ on the DSC
+
+elbtrace conf_dma /data/sample-conf-dma.json
+elbtrace show_dma
+
+elbtrace dump_dma dmatrace.bin
+
+sdk/platform/elbtrace/elbtrace.py decode_dma dmatrace.bin
+sdk/platform/elbtrace/elbtrace.py decode_dma --print=all dmatrace.bin:q
+
+
+// Mnic axi address
+grep axi_awaddr axitrace.reports/trace_TD.log | grep -v 12d | grep -v 1260 | g
+rep -v 17fa | grep -v 12fe | grep -v 1244
+
+
+            [C] addr_range              :        
+                addr_lo                 : 0x2000000 (0x80000000)
+                addr_hi                 : 0x2ffffff (0xbfffffff)
+
+
+            [C] addr_range              : 
+                addr_lo                 : 0x4c400000 (0x1310000000)
+                addr_hi                 : 0x5fe7ffff (0x17f9ffffff)
+
+

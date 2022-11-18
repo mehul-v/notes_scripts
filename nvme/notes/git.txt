@@ -1,0 +1,10 @@
+# Fetch PR from github
+git fetch origin pull/<id>/head:<br name>
+
+Reset All git submodules
+$ git submodule foreach --recursive git reset --hard
+
+# unbinds all submodules
+git submodule deinit -f .
+# checkout again
+git submodule update --init --recursive

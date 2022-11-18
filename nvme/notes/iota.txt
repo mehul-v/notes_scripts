@@ -1,0 +1,25 @@
+/vol/tool/cicd/jobc d s test-7967 
+
+=== drops into container
+cd /local/<my workspace>/ws/src/github.com/pensando/sw ; rm -rf nic/build ;  git clean -fdX :/ ;  git submodule foreach git clean -fdX :/ ; git submodule update --init --recursive :/ ; cd /local/<my workspace>/ws/src/github.com/pensando/sw/nic ; make docker/shell
+
+=== to build make
+cd /usr/src/github.com/pensando/sw ; V=1 make -C nic ASIC=elba PIPELINE=athena ARCH=aarch64 PLATFORM=hw firmware 2>&1 | tee log.oci.elba.athena.fw.2
+
+./platform/tools/drivers-linux.sh ; ./platform/tools/drivers-linux-eth.sh ; cd  iota ; make
+=== to trigger IOTA (to let IOTA install fw)
+
+export USE_PENINIT=1 ; ASIC=elba ./iota.sh --testbed <tb.json> --pipeline athena --testsuite nvme --testbundle nvme --debug --skip-logs 2>&1 | tee iota.nvme.athena.run.<tb#>.log.1
+
+=== to trigger IOTA (if fw installed manually)
+export USE_PENINIT=1 ; ASIC=elba ./iota.sh --testbed <tb.json> --pipeline athena --testsuite nvme --testbundle nvme --debug --skip-firmware-upgrade --skip-logs --precheckin --skip-sanity 2>&1 | tee iota.nvme.athena.run.<tb#>.log.1
+
+
+USE_PENINIT=1 ASIC=elba ./iota.sh --testbed test-9528.json --pipeline athena --testsuite nvme --testbundle nvme --debug --skip-logs --precheckin --skip-sanity 2>&1 | tee iota.nvme.athena.run.9528.log.1
+
+
+USE_PENINIT=1 ASIC=elba ./iota.sh --testbed test-7967.json --pipeline athena --testsuite nvme --testbundle nvme --debug --skip-firmware-upgrade --skip-logs --precheckin --skip-sanity 2>&1 | tee iota.nvme.athena.run.7967.log.1
+
+
+#download iota logs
+/vol/tool/cicd/jobc t savedlog 12888864 -o 12888864

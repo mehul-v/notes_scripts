@@ -1,0 +1,171 @@
+pdsctl:
+
+pdsctl show system statistics drop packet-buffer
+pdsctl show system statistics global
+pdsctl show port statistics
+
+pdsctl show system statistics packet-buffer drop | grep OUT_OF_CREDIT_DROP
+
+####################################################################################
+nsvcfg:
+nsvcfg debug sess_show --sess
+nsvcfg nvme_global config_clear
+nsvcfg ns show --ns 10001 --ns_paths
+nsvcfg debug ns_show_paths  --ns <nsid>
+nsvcfg load --json /data/nvme_testsuite_nsvcfg_cfg.json 
+nsvcfg path update --mode disable --path 12001
+nsvcfg debug ctrlr_sess_show --ctrlr_no <no>
+nsvcfg debug ns_sess_show --ns 10001
+nsvcfg debug upgrade_summary
+nsvcfg ctrlr show --ctrlr <ctrlr> --ctrlr_ns --format_json
+
+eth_dbgtool memreg_info big-rx-objs
+
+####################################################################################
+vppctl:
+vppctl set interface ip address cpu_mnic3 1.1.0.1/24
+vppctl set ip arp cpu_mnic3 1.1.0.2 00:ae:cd:0e:bc:e0
+
+
+####################################################################################
+iptables:
+iptables -t mangle -A OUTPUT -p tcp -j DSCP --set-dscp 32
+
+####################################################################################
+tcp:
+vppctl show tcp-plugin session open
+vppctl show tcp-plugin session qid 2476
+vppctl show tcp-plugin session closed --ver
+vppctl show session verbose 
+
+/nic/bin/vppctl show tcp-plugin global ooq
+/nic/bin/vppctl set tcp-plugin global ooq 0
+
+pdsctl show tcp-proxy statistics --qid 2476
+pdsctl show tcp-proxy cb --qid 2476
+
+
+- create json dump
+eth_dbgtool tcp tcpcb --from-tcp-qid 10 --to-tcp-qid 100 > /tmp/tcpcb-dump.json
+- parse state
+cd /nic/tools/debug/tcpcb/
+python3 main.py -l ./tcpcb_parsing_meta.out -d /tmp/tcpcb-dump.json
+
+####################################################################################
+elbmon
+
+# elbmon | grep -A1 '== SXDMA ==' ; sleep 2 ; elbmon | grep -A1 '== SXDMA =='
+
+####################################################################################
+
+lspci:
+lspci -nn -d 1dd8:
+lspci -nnvv -d 1dd8:
+
+#enable vf on host
+#find PF device number, replace 61 below with it
+echo 15 > /sys/bus/pci/devices/0000\:61\:00.0/sriov_numvfs
+
+# remove and rescan
+echo 1 > /sys/bus/pci/devices/0000\:b8\:00.0/remove
+echo 1 > /sys/bus/pci/rescan
+
+####################################################################################
+Blacklist NVME
+
+Add following 2 lines to /etc/modprobe.d/blacklist.conf on your Host
+blacklist nvme
+blacklist nvme_core
+Run following command after editing above conf file:
+sudo update-initramfs -u
+
+####################################################################################
+
+Using Semaphore to debug
++# Count Events. Address of first semaphore_inc is 0x40002000
++   addi  r5, r0, 0x40002000
++# Increment counter tracking the number of times this program runs
++   st.w  0(r5), 1
+
+Turn off NPV
++    addi            r6, r0, 0x12c80008
++    st.w.c3         0(r6), 0            // turn off npv
+####################################################################################
+elbtrace
+
+MPU trace
+elbtrace conf /nic/conf/elbtrace/txdma-all.json
+elbtrace dump /data/xw/elbtrace.bin
+
+./sdk/platform/elbtrace/elbtrace.py gen_syms --pipeline athena
+/sdk/platform/elbtrace/elbtrace.py decode_mpu elbtrace.bin --load=mpu_prog_info.json  --sym=elbtrace.syms  > ./elbtrace.decode
+
+decode  --fltr phv_timestamp_capture=xxxx
+
+enable source trace
+nic/sdk/mkinfra/common.mk
+
+--supress-phvwr-flush
+
+read pct_te0_cfg_global, set step_key=0
+
+####################################################################################
+dd if=data-16k.dat of=/dev/nvme0n2 bs=4096 count=4 seek=174
+./xex2.py -V -i shifted -a 712704  -b 4096 -s 16384 /tmp/spdk_dev2_ns1 data-16k.dat
+
+nsv_scale_cfg.py --no-auto-connect -d0 -n4 -g16 -p1 --nsobj obj_key=10004 ivmode=shifted persistent=True crypto_dis=True
+
+dd if=data-16k.dat of=/dev/nvme0n4 bs=4096 count=4 seek=174
+dd if=/tmp/spdk_dev4_ns1 seek=174 of=data4.out bs=4096 count=4
+
+nsv_scale_cfg.py --no-auto-connect -d0 -n4 -g1 -p1 --nsobj obj_key=10001 ivmode=shifted blksz=4096 persistent=True crypto_dis=True
+####################################################################################
+#Find nvme device on host
+
+find /sys/ -type d -name nvme
+
+# Mapping host nvme device to nvme controller on elba
+root@kickseed:~# nvme id-ctrl -H /dev/nvme1 | grep -w sn
+sn        : PDSNVME-01          
+subnqn    : nqn.2019-08.com.pensando:nvm-subsystem-sn-8002-1-0
+root@kickseed:~# nvme id-ctrl -H /dev/nvme2 | grep -w sn                                                                                                                                                                      
+sn        : PDSNVME-02          
+subnqn    : nqn.2019-08.com.pensando:nvm-subsystem-sn-8003-2-0
+root@kickseed:~# nvme id-ctrl -H /dev/nvme0 | grep -w sn                                                                                                                                                                      
+sn        : PDSNVME-00          
+subnqn    : nqn.2019-08.com.pensando:nvm-subsystem-sn-8001-0-0
+
+# nsvcfg ctrlr show
+{
+    "Controllers": [
+        {
+            "key": "e47b55cb-b6ef-5794-bc8f-068068cd7e7e",
+            "id": "0",
+            "nqn": "nqn.2019-08.com.pensando:nvm-subsystem-sn-8003-2-0",
+            "bus": "0",
+            "dev_no": "2",
+            "function": "0",
+            "virtual function": "0",
+
+####################################################################################
+Disassembly:
+
+./sdk/third-party/asic/ip/verif/pensim/gen/x86_64/bin/elbdis -f build/aarch64/athena/elba/bin/p4pasm_txdma/nvme_req_rx_rqcb_writeback_process.bin
+####################################################################################
+
+jobc
+
+/vol/tool/cicd/jobc t savedlog 12888864 -o 12888864
+this will download the logs from this job to a folder called 12888864
+
+
+####################################################################################
+tcpdump
+
+mkdir /var/ramdisk
+mount -t tmpfs tmpfs /var/ramdisk -o size=300000k
+cd /var/ramdisk/
+tcpdump -i ens5f1 -s 128 tcp -w /var/ramdisk/tcp.pcap
+   
+tcpdump -i enp96s0 tcp -W 10 -C 20 -s 128 -w tcprto.pcap
+####################################################################################

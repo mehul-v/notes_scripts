@@ -1,0 +1,3 @@
+
+make -k PIPELINE=athena ASIC=elba P4PLUS_VER=16 athena_{nvme_{{req,{pre,post}{xts,dgst}}_{tx,rx},adminq_tx,rsrcfree_rx},tcp_{rx,tx,ooq_tx},gc_tx}.asmbin
+

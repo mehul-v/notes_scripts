@@ -1,0 +1,35 @@
+rm -rf /data/asic_tclsh
+mkdir /data/asic_tclsh
+cp /data/nic.tar.gz /data/asic_tclsh/
+cd /data/asic_tclsh
+tar -zxvf nic.tar.gz
+cd nic/fake_root_target/nic/
+export ASIC_LIB_BUNDLE=`pwd`
+export ASIC_SRC=$ASIC_LIB_BUNDLE/asic_src
+cd asic_lib/
+source ./source_env_path
+./diag.exe
+source $::env(ASIC_SRC)/ip/cosim/tclsh/.tclrc.diag.elb
+source ../asic_src/ip/cosim/common/common_utils.tcl
+source ../asic_src/ip/cosim/haps/common/help.tcl
+source ../asic_src/ip/cosim/elba/haps/common.elba/ms.tcl
+source ../asic_src/ip/cosim/elba/haps/j2c_asic.tcl
+source ../asic_src/ip/cosim/elba/haps/mem_utils.tcl
+
+
+Scheduler:
+tclsh
+% elb_txs_active_queue_stat 0 0 5
+
+Dump txdma npv count, chip_id = 0, inst_id=1, inst_id=1 means txdma
+%elb_npv_dump_cnt 0  1
+
+for sxdma: elb_npv_dump_cnt 0 0
+for rxdma: elb_psp_dump_cnt 0 0
+
+Sampling npv txdma
+%elb_npv_capture_txs 0 1 1000
+
+qstate mapping
+% source ../asic_src/ip/cosim/common/common_utils.tcl
+% rds elb0.pt.pt.psp.dhs_lif_qstate_map.entry\[35\]
