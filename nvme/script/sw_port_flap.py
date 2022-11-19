@@ -60,6 +60,22 @@ def dsc_traffic_check(dsc_hdl):
         print('Traffic Validation PASSED after Port Flap')
         logger.info('Traffic Validation PASSED after Port Flap')
 
+def dsc_drain_check(dsc_hdl):
+    print('Verifying rx_drain == tx_drain before port up')
+    logger.info('Verifying rx_drain == tx_drain before port up')
+    for num in range (10):
+        tx_drain = dsc_hdl.send_command("nsvcfg debug stats | grep tcp_tx_drain_done | tr -s ' ' | cut -d ' ' -f 3")
+        rx_drain = dsc_hdl.send_command("nsvcfg debug stats | grep tcp_rx_drain_done | tr -s ' ' | cut -d ' ' -f 3")
+        fstr = f'tx_drain: {tx_drain}  rx_drain: {rx_drain}'
+        print(fstr)
+        logger.info(fstr)
+        if int(tx_drain) == int(rx_drain):
+            return;
+        time.sleep(3)
+    print('drain check failed')
+    dsc_nvme_techsupport(hdl, "port_flap")
+    sys.exit(1)
+
 def verify_naples_core(hdl, core_dir="/data/core/"):
     """
     function to check if core files are seen after a test run
@@ -195,6 +211,7 @@ for i in range(ITERATIONS):
     print(interface_state)
     time.sleep(DELAY_IN_SEC)
     #time.sleep(2)
+    dsc_drain_check(dschdl)
     print("Performing No-Shut On Interface")
     logger.info("Performing No-Shut on Interface")
     config_interface(hdl, [DSC_UPLINK0_INTF_LIST], NO_SHUT_CMD)
