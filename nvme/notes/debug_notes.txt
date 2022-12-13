@@ -8,16 +8,26 @@ pdsctl show system statistics packet-buffer drop | grep OUT_OF_CREDIT_DROP
 
 ####################################################################################
 nsvcfg:
-nsvcfg debug sess_show --sess
-nsvcfg nvme_global config_clear
+// ctrlr ns
+nsvcfg ctrlr show --ctrlr_ns --ns_paths
+nsvcfg ctrlr show --ctrlr <ctrlr> --ctrlr_ns --format_json
+
+// Ns path
 nsvcfg ns show --ns 10001 --ns_paths
 nsvcfg debug ns_show_paths  --ns <nsid>
-nsvcfg load --json /data/nvme_testsuite_nsvcfg_cfg.json 
 nsvcfg path update --mode disable --path 12001
+
+// session
 nsvcfg debug ctrlr_sess_show --ctrlr_no <no>
 nsvcfg debug ns_sess_show --ns 10001
+nsvcfg debug sess_show --sess
+
+// Upgrade
 nsvcfg debug upgrade_summary
-nsvcfg ctrlr show --ctrlr <ctrlr> --ctrlr_ns --format_json
+
+// Config
+nsvcfg nvme_global config_clear
+nsvcfg load --json /data/nvme_testsuite_nsvcfg_cfg.json 
 
 eth_dbgtool memreg_info big-rx-objs
 
@@ -175,4 +185,8 @@ NVME control plan logs
 
 egrep -i "gsessid.*538|g_sessid 395|g sess id 538|session num 538" /obfl/nvme.log | grep -v "ioscan"
 
+
+####################################################################################
+gdb load core and dump nsv debug stats
+p nsv::nsv_sys::g_global_stats_.path_stats
 ####################################################################################
