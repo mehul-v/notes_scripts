@@ -34,9 +34,10 @@ ifconfig oob_mnic0
 
 #stress 
 #nsv_scale_cfg.py --no-auto-connect -b 4096 -b 512 -b 4096 -b 512 -m SHIFTED -m SHIFTED -m NORMAL -m NORMAL -n 8 -g 115 -p 1 -d 0 -d 0 -d 0 -d 0 -v 1 -t 1.1.0.2 -t 1.1.0.3
+nsv_scale_cfg.py --no-auto-connect -n 4 -g 115 -p 1 --nsobj obj_key=10002 ivmode=shifted blksz=512 --nsobj obj_key=10003 ivmode=NORMAL blksz=4096 --nsobj obj_key=10004 ivmode=NORMAL blksz=512 --nsobj obj_key=10006 ivmode=shifted blksz=512 --nsobj obj_key=10007 ivmode=NORMAL blksz=4096 --nsobj obj_key=10008 ivmode=NORMAL blksz=512 --nsobj obj_key=10010 ivmode=shifted blksz=512 --nsobj obj_key=10011 ivmode=NORMAL blksz=4096 --nsobj obj_key=10012 ivmode=NORMAL blksz=512 --nsobj obj_key=10013 persistent=True ivmode=shifted blksz=4096 --nsobj obj_key=10014 persistent=True ivmode=shifted blksz=512 --nsobj obj_key=10015 persistent=True ivmode=NORMAL blksz=4096 --nsobj obj_key=10016 persistent=True ivmode=NORMAL blksz=512 nsPathTag=true -t 1.1.0.2 -t 1.1.0.3
 
 # 1PF,15VF, 8NS per each pf/vf, 32path group with 2path per group
-nsv_scale_cfg.py --no-auto-connect -b 4096 -n 8 -g 32 -p 2 -d 15 -t 1.1.0.2 -t 1.1.0.3
+#nsv_scale_cfg.py --no-auto-connect -b 4096 -n 8 -g 32 -p 2 -d 15 -t 1.1.0.2 -t 1.1.0.3
 
 #crash recovery + upgrade
 #/nic/tools/nsv_scale_cfg.py -d 2 -n 8 -g 1 -p 1 -t 1.1.0.2
