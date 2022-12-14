@@ -8,6 +8,9 @@ pdsctl show system statistics packet-buffer drop | grep OUT_OF_CREDIT_DROP
 
 ####################################################################################
 nsvcfg:
+// ctrlr
+nsvcfg ctrlr show --show_status --show_stats --detailed --format_json
+
 // ctrlr ns
 nsvcfg ctrlr show --ctrlr_ns --ns_paths
 nsvcfg ctrlr show --ctrlr <ctrlr> --ctrlr_ns --format_json
@@ -18,7 +21,7 @@ nsvcfg debug ns_show_paths  --ns <nsid>
 nsvcfg path update --mode disable --path 12001
 
 // session
-nsvcfg debug ctrlr_sess_show --ctrlr_no <no>
+nsvcfg debug ctrlr_sess_show --ctrlr <ctrlr_id>
 nsvcfg debug ns_sess_show --ns 10001
 nsvcfg debug sess_show --sess
 
