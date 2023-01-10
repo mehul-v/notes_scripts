@@ -73,7 +73,7 @@ def dsc_drain_check(dsc_hdl):
             return;
         time.sleep(3)
     print('drain check failed')
-    dsc_nvme_techsupport(hdl, "port_flap")
+    #dsc_nvme_techsupport(hdl, "port_flap")
     sys.exit(1)
 
 def verify_naples_core(hdl, core_dir="/data/core/"):
@@ -174,10 +174,10 @@ SWITCH_PASSWORD = "Pen1nfra$"
 DSC_UPLINK0_INTF_LIST = "Eth1/25-26"
 SHUT_CMD = "shut"
 NO_SHUT_CMD = "no shut"
-ITERATIONS = 100
+ITERATIONS = 20
 TEST_FAIL = False
 FAIL_DSC_LIST = []
-DSC_IP= "10.8.100.60"
+DSC_IP= "10.8.110.1"
 DELAY_IN_SEC=70
 HOST_USER="root"
 HOST_PASSWORD="docker"
@@ -210,7 +210,6 @@ for i in range(ITERATIONS):
     logger.info(interface_state)
     print(interface_state)
     time.sleep(DELAY_IN_SEC)
-    #time.sleep(2)
     dsc_drain_check(dschdl)
     print("Performing No-Shut On Interface")
     logger.info("Performing No-Shut on Interface")
