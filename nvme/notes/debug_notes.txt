@@ -323,3 +323,13 @@ assign all_int_vec = {
 enable ptd.cfg_dbg.int_freeze_en corresponding interrupt to 1
 
 ####################################################################################
+
+SDP trace
+
+elbtrace conf_sdp /data/txdma-stg34.json
+# run the test
+elbtrace dump_sdp /data/sdp.bin
+# transfer the sdp.bin to your build docker and in build docker:
+./sdk/platform/elbtrace/elbtrace.py decode_sdp --model_debug build/x86_64/iris/elba/gen/p4gen/nvme_sess_pre_xts_rx/dbg_out/model_debug.json sdp.bin >sdp.txt
+
+####################################################################################

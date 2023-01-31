@@ -1,0 +1,30 @@
+ {
+   "instances": [
+     {
+       "pipeline": "txdma",
+       "stage": "[34]",
+       "control": {
+         "trace": true,
+         "trace_trigger_enable": true
+       },
+       "capture": {
+         "trigger_data": {
+           "lif": "0x4a",
+           "qid": "0x12",
+           "drop": 0
+         },
+         "trigger_mask": {
+           "lif": "0x1FF",
+           "qid": "0xFFF",
+           "drop": 1
+         }
+       },
+       "settings": {
+         "trace-size": "512",
+         "no_trace_when_full": false,
+         "stop_when_full": false
+       },
+       "description": "this enables for txdma pipelines, stage 3 and 4, sdp with the specified options"
+     }
+   ]
+ }
