@@ -333,3 +333,11 @@ elbtrace dump_sdp /data/sdp.bin
 ./sdk/platform/elbtrace/elbtrace.py decode_sdp --model_debug build/x86_64/iris/elba/gen/p4gen/nvme_sess_pre_xts_rx/dbg_out/model_debug.json sdp.bin >sdp.txt
 
 ####################################################################################
+
+Disabling rebooting DSC after host reboot
+mv /nic/tools/pcie_hostdn.sh /nic/tools/pcie_hostdn.sh-saved
+
+A host pcie reset will not cause an asic reset. If the host triggers a slot power cycle
+though, then the DSC still gets power cycled.
+
+####################################################################################
