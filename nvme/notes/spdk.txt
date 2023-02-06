@@ -1,0 +1,40 @@
+Enable SPDK debugging logging
+
+0.  Clean spdk/build directory
+root@tb74-host2:~/spdk# rm -rf build/
+
+ 1. Edit file : spdk/CONFIG and set below flag
+
+# Build with debug logging. Turn off for performance testing and normal usage
+CONFIG_DEBUG=y
+
+ 2.  Inside spdk directory, run below command
+
+root@tb74-host2:~/spdk# ./configure  --enable-debug
+
+3.   Run make inside spdk directory
+
+root@tb74-host2:~/spdk# make
+
+4.   Perform below steps before starting traffic.
+
+/root/spdk/scripts/rpc.py log_set_level DEBUG
+/root/spdk/scripts/rpc.py log_set_print_level DEBUG
+/root/spdk/scripts/rpc.py log_set_flag nvmf_tcp
+/root/spdk/scripts/rpc.py log_set_flag nvmf
+/root/spdk/scripts/rpc.py log_set_flag nvme
+/root/spdk/scripts/rpc.py log_set_flag aio
+
+We should see the below output once we run the get commands
+
+root@tb74-host2:~# /root/spdk/scripts/rpc.py log_get_print_level
+"DEBUG"
+
+root@tb74-host2:~# /root/spdk/scripts/rpc.py log_get_flags | grep true
+  "aio": true,
+  "nvme": true,
+  "nvmf": true,
+  "nvmf_tcp": true,
+
+
+
