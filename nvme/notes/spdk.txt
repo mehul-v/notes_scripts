@@ -1,3 +1,4 @@
+#######################################################################################
 Enable SPDK debugging logging
 
 0.  Clean spdk/build directory
@@ -37,4 +38,34 @@ root@tb74-host2:~# /root/spdk/scripts/rpc.py log_get_flags | grep true
   "nvmf_tcp": true,
 
 
+#######################################################################################
+Setup SPDK with nvme bdev with backing SSD
 
+1. Find SSD's pci address
+   # modprobe nvme
+   # readlink -f  /sys/class/nvme/nvme0
+   # lspci -nv -c :da:00.0
+   # nvme id-ctrl -H /dev/nvme0
+   # nvme id-ns -H /dev/nvme0n1
+  
+2. Add rpc command in target script to attach nvme bdev
+   /root/spdk/scripts/rpc.py bdev_nvme_attach_controller -b nvme0 -t PCIe -a 0000:da:00.0
+   /root/spdk/scripts/rpc.py bdev_nvme_attach_controller -b nvme1 -t PCIe -a 0000:dc:00.0
+
+   for ((CTL_i=1; CTL_i<=NUM_CTL; CTL_i++))
+   do
+        BD="nvme$((CTL_i-1))n1"
+        NQN="nqn.2016-06.io.spdk:cnode${CTL_i}"
+        SN="$(printf 'SPDK%014u' "${CTL_i}")"
+
+        cmd "$SPDK_RPC" nvmf_create_subsystem "$NQN" -a -s "$SN" -d "SPDK_Controller$CTL_i" -m "$NUM_CTL_NS"
+        cmd "$SPDK_RPC" nvmf_subsystem_add_listener -t tcp -a "$ADDR" -s 4420 -f ipv4 "$NQN"
+
+        cmd "$SPDK_RPC" nvmf_subsystem_add_ns "$NQN" "$BD"
+   done
+
+3. Kill nvmf_tgt and restart it, getting LBA size from spdk bdev output
+   1. # /root/spdk/build/bin/spdk_lspci 
+   2. # /root/spdk/scripts/rpc.py bdev_get_bdevs
+
+#######################################################################################
