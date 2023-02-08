@@ -44,7 +44,12 @@ Setup SPDK with nvme bdev with backing SSD
 1. Find SSD's pci address
    # modprobe nvme
    # readlink -f  /sys/class/nvme/nvme0
-   # lspci -nv -c :da:00.0
+      /sys/devices/pci0000:d7/0000:d7:00.0/0000:d8:00.0/0000:d9:00.0/0000:da:00.0/nvme/nvme0
+   # lspci -nn -s :da:00.0
+      da:00.0 Non-Volatile memory controller [0108]: Kingston Technology Company, Inc. Device [2646:5013] (rev 01)
+   # lspci -nn -d :5013
+      da:00.0 Non-Volatile memory controller [0108]: Kingston Technology Company, Inc. Device [2646:5013] (rev 01)
+      dc:00.0 Non-Volatile memory controller [0108]: Kingston Technology Company, Inc. Device [2646:5013] (rev 01)
    # nvme id-ctrl -H /dev/nvme0
    # nvme id-ns -H /dev/nvme0n1
   
