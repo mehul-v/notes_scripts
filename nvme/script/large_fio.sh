@@ -12,8 +12,11 @@ for file in "${files[@]}"
 do
     for rw in "${rws[@]}"
     do
-        fio_cmd=(fio --filename=${file} --direct=1 --rw=${file} --bs=${blk_sz} --group_reporting --randrepeat=1 --ioengine=libaio --name nvmeperf --iodepth=${iodepth} --numjobs=${njobs} --eta-newline=1 --time_based --runtime=${rt})
+        fio_cmd=(fio --filename=${file} --direct=1 --rw=${rw} --bs=${blk_sz} --group_reporting --randrepeat=1 --ioengine=libaio --name nvmeperf --iodepth=${iodepth} --numjobs=${njobs} --eta-newline=1 --time_based --runtime=${rt})
         echo ${fio_cmd[@]}
-        #eval "${fio_cmd[@]}"
+        res=eval "${fio_cmd[@]}"
+        if [[ $res != '0' ]]; then
+            return 1
+        fi
     done
 done
