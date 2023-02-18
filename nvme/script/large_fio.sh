@@ -8,15 +8,21 @@ iodepth=512
 njobs=64
 rt=20
 
-for file in "${files[@]}"
+iter=1
+for rw in "${rws[@]}"
 do
-    for rw in "${rws[@]}"
+    for file in "${files[@]}"
     do
         fio_cmd=(fio --filename=${file} --direct=1 --rw=${rw} --bs=${blk_sz} --group_reporting --randrepeat=1 --ioengine=libaio --name nvmeperf --iodepth=${iodepth} --numjobs=${njobs} --eta-newline=1 --time_based --runtime=${rt})
         echo ${fio_cmd[@]}
-        res=eval "${fio_cmd[@]}"
-        if [[ $res != '0' ]]; then
-            return 1
-        fi
+	eval "${fio_cmd[@]}"
+        #echo "$result"
+	if [ $? -eq 0 ]; then
+	    echo "iteration $iter succeeds"
+    	else
+	    echo "iteration $iter fails result $?"
+            exit
+	fi
+	((iter++))
     done
 done
