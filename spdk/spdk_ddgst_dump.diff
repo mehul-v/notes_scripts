@@ -1,0 +1,30 @@
+diff --git a/isa-l b/isa-l
+--- a/isa-l
++++ b/isa-l
+@@ -1 +1 @@
+-Subproject commit 2df39cf5f1b9ccaa2973f6ef273857e4dc46f0cf
++Subproject commit 2df39cf5f1b9ccaa2973f6ef273857e4dc46f0cf-dirty
+diff --git a/lib/nvmf/tcp.c b/lib/nvmf/tcp.c
+index caab06af8..723db76eb 100644
+--- a/lib/nvmf/tcp.c
++++ b/lib/nvmf/tcp.c
+@@ -1888,7 +1888,18 @@ data_crc32_calc_done(void *cb_arg, int status)
+ 	}
+ 	pdu->data_digest_crc32 ^= SPDK_CRC32C_XOR;
+ 	if (!MATCH_DIGEST_WORD(pdu->data_digest, pdu->data_digest_crc32)) {
+-		SPDK_ERRLOG("Data digest error on tqpair=(%p) with pdu=%p\n", tqpair, pdu);
++		SPDK_ERRLOG("Data digest error on tqpair=(%p) with pdu=%p 0x%x%x%x%x:0x%x\n",
++				tqpair, pdu, pdu->data_digest[0], pdu->data_digest[1],
++				pdu->data_digest[2], pdu->data_digest[3], pdu->data_digest_crc32);
++		SPDK_ERRLOG("init_port %u pdu_type %u, flags 0x%x, plen %u plen %u opc: %u cid %u nsid %u\n",
++				tqpair->initiator_port,
++				pdu->hdr.common.pdu_type,
++				pdu->hdr.common.flags,
++				pdu->hdr.common.hlen,
++				pdu->hdr.common.plen,
++				pdu->hdr.capsule_cmd.ccsqe.opc,
++				pdu->hdr.capsule_cmd.ccsqe.cid,
++				pdu->hdr.capsule_cmd.ccsqe.nsid);
+ 		tcp_req = pdu->req;
+ 		assert(tcp_req != NULL);
+ 		rsp = &tcp_req->req.rsp->nvme_cpl;
