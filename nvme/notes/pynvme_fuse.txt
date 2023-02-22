@@ -1,0 +1,86 @@
+Pynvme fuse test setup
+
+Summary
+
+1. Start spdk target with nvme bdev backed by ssd.
+2. Enable pynvme fuse test.
+
+
+#######################################################################################
+Setup SPDK with nvme bdev with backing SSD
+
+1. Find SSD's pci address
+   # modprobe nvme
+   # readlink -f  /sys/class/nvme/nvme0
+      /sys/devices/pci0000:d7/0000:d7:00.0/0000:d8:00.0/0000:d9:00.0/0000:da:00.0/nvme/nvme0
+   # lspci -nn -s :da:00.0
+      da:00.0 Non-Volatile memory controller [0108]: Kingston Technology Company, Inc. Device [2646:5013] (rev 01)
+   # lspci -nn -d :5013
+      da:00.0 Non-Volatile memory controller [0108]: Kingston Technology Company, Inc. Device [2646:5013] (rev 01)
+      dc:00.0 Non-Volatile memory controller [0108]: Kingston Technology Company, Inc. Device [2646:5013] (rev 01)
+   # nvme id-ctrl -H /dev/nvme0
+   # nvme id-ns -H /dev/nvme0n1
+  
+2. Add rpc command in target script to attach nvme bdev
+   /root/spdk/scripts/rpc.py bdev_nvme_attach_controller -b nvme0 -t PCIe -a 0000:da:00.0
+   /root/spdk/scripts/rpc.py bdev_nvme_attach_controller -b nvme1 -t PCIe -a 0000:dc:00.0
+
+   for ((CTL_i=1; CTL_i<=NUM_CTL; CTL_i++))
+   do
+        BD="nvme$((CTL_i-1))n1"
+        NQN="nqn.2016-06.io.spdk:cnode${CTL_i}"
+        SN="$(printf 'SPDK%014u' "${CTL_i}")"
+
+        cmd "$SPDK_RPC" nvmf_create_subsystem "$NQN" -a -s "$SN" -d "SPDK_Controller$CTL_i" -m "$NUM_CTL_NS"
+        cmd "$SPDK_RPC" nvmf_subsystem_add_listener -t tcp -a "$ADDR" -s 4420 -f ipv4 "$NQN"
+
+        cmd "$SPDK_RPC" nvmf_subsystem_add_ns "$NQN" "$BD"
+   done
+
+3. Kill nvmf_tgt and restart it, getting LBA size from spdk bdev output
+   1. # /root/spdk/build/bin/spdk_lspci 
+   2. # /root/spdk/scripts/rpc.py bdev_get_bdevs
+#######################################################################################
+
+#######################################################################################
+Enable pynvme fuse test.
+
+1. Follow the instruction at https://pynvme.readthedocs.io/en/latest/install.html to 
+   clone a pynvme repo and install it (I didn't figure out how to work with pensando
+   pynvme bundle)
+   
+2. Pynvme has a LBA range check to make sure outstanding commands do not overlap each
+   other. This actually prevents fuse-write command from being issued. The following
+   patch disable this check to allow fuse command test to be executed. Better to modify
+   this check to bypass for fuse command only
+
+diff --git a/src/driver.c b/src/driver.c
+index 39c7b22..3b5ed0e 100644
+--- a/src/driver.c
++++ b/src/driver.c
+@@ -370,6 +370,7 @@ static bool crc32_check_lock_bits(struct spdk_nvme_ns* ns,
+ {
+   SPDK_DEBUGLOG(SPDK_LOG_NVME, "slba 0x%lx, nlb %d\n", slba, nlb);
+ 
++  return false;
+   if (crc_table != NULL && slba*sizeof(uint32_t) < ns->table_size)
+   {
+     // clear crc table if it exists and cover the lba range
+
+
+3. Enable pynvme debugging for development of testing code
+   @@ -2191,7 +2193,8 @@ int driver_init(void)
+   // distribute multiprocessing to different cores
+   // log level setup
+   spdk_log_set_flag("nvme");
+-  spdk_log_set_print_level(SPDK_LOG_INFO);
++  spdk_log_set_print_level(SPDK_LOG_DEBUG);
+ 
+   // start rpc server in primary process only
+   if (spdk_process_is_primary())  
+
+3. Build and run pynvme example fuse test
+   # make setup
+   # make test TESTS=scripts/test_examples.py::test_fused_operations pciaddr=61:00.0
+#######################################################################################
+
