@@ -1,9 +1,3 @@
-diff --git a/isa-l b/isa-l
---- a/isa-l
-+++ b/isa-l
-@@ -1 +1 @@
--Subproject commit 2df39cf5f1b9ccaa2973f6ef273857e4dc46f0cf
-+Subproject commit 2df39cf5f1b9ccaa2973f6ef273857e4dc46f0cf-dirty
 diff --git a/lib/nvmf/tcp.c b/lib/nvmf/tcp.c
 index caab06af8..723db76eb 100644
 --- a/lib/nvmf/tcp.c
