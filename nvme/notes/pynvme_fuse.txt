@@ -4,7 +4,7 @@ Summary
 
 1. Start spdk target with nvme bdev backed by ssd.
 2. Enable pynvme fuse test.
-
+3. TODOs
 
 #######################################################################################
 Setup SPDK with nvme bdev with backing SSD
@@ -82,5 +82,21 @@ index 39c7b22..3b5ed0e 100644
 3. Build and run pynvme example fuse test
    # make setup
    # make test TESTS=scripts/test_examples.py::test_fused_operations pciaddr=61:00.0
+#######################################################################################
+
+TODOs:
+1. Add support for fused command in pynvme (Current example fuse cmd is sent with generic IOs)
+2. Bypass LBA range check in pynvme for fused command
+3. Implement basic fuse test (postive test)
+    a. write a LBA range initial, do fused compare and write on the same range for
+       a number of iterations, with each iteration updating LBs with new values.
+       paramterizing number of LBAs, qdepth, random or sequential, and etc.
+    b. Negative test case of above, with iteration expected to fail due to compare
+       failure.
+    c. Combined fused commands with normal IOs. Modify pynvme iowalker to allow 
+       a percentage of fused commands with normal read/write IOs.
+
+
+
 #######################################################################################
 
