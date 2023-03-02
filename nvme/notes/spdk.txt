@@ -78,6 +78,11 @@ Update SPDK asset in git repo
 
 1. Clone spdk 22.09 from GitHub , apply your  changes.
 2. Do the spdk build and create tar ball of entire spdk directory
+   cd spdk
+   git submodule update --init
+   ./scripts/pkgdep.sh
+   ./configure
+   make
 3. Upload spdk new tar ball via upload asest jobc command
    tar cvz $(cat minio/spdk_nvme.txt) | /vol/tool/cicd/asset-upload  spdk_nvme <version>  /dev/stdin
    pick a descriptive version name
