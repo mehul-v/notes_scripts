@@ -184,6 +184,11 @@ tcpdump -i enp96s0 tcp -W 10 -C 20 -s 128 -w tcprto.pcap
 
 
 ####################################################################################
+EDMA
+
+eth_dbgtool edma_read 65 5 7 0x84c00000ffffd000 128
+
+####################################################################################
 NVME control plan logs
 
 egrep -i "gsessid.*538|g_sessid 395|g sess id 538|session num 538" /obfl/nvme.log | grep -v "ioscan"
